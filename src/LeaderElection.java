@@ -23,23 +23,33 @@ public class LeaderElection {
 		System.out.println("\n");
 		
 		
+		ArrayList<ArrayList<Integer>> neighborsList=new ArrayList<ArrayList<Integer>>();
 		for(int i=0;i<n;i++)
 		{
-			
+			ArrayList<Integer> arr=new ArrayList<Integer>();
 			System.out.print("Neighbors of process "+i+": ");
 			for(int j=0;j<n;j++)
-				{
+			{
 				int k=scanner.nextInt();
 				
 				if(k==1)
 				
-			{
+				{
 				System.out.print(uids.get(j)+" ");
+				arr.add(uids.get(j));
 			}
 				}
 			System.out.print("\n");
+			neighborsList.add(arr);
 				
 		}
+		
+		
+		/*for(int i=0;i<n;i++)
+		{
+			Process process=new Process(uids.get(i),neighborsList.get(i));
+			new Thread(process).start();
+		}*/
 		
 		
 		scanner.close();
