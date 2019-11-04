@@ -15,7 +15,7 @@ public class Message {
 		this.sender=sender;
 		this.senderParent=lastExploreSenderParent;
 		this.messageType=messageType;
-		this.travelTime=(int)(Math.random()*10)+1;
+		this.travelTime=(int)(Math.random()*9)+1;
 	}
 	
 	public int getId()

@@ -9,8 +9,8 @@ public class LeaderElection {
 	
 	public static void main(String[] args) throws Exception
 	{
-		Scanner scanner=new Scanner(new File("/users/psprao/downloads/connectivity.txt"));
-		//Scanner scanner=new Scanner(new File("/users/psprao/downloads/conectivity2.txt"));
+		//Scanner scanner=new Scanner(new File("/users/psprao/downloads/connectivity.txt"));
+		Scanner scanner=new Scanner(new File("/users/psprao/downloads/conectivity2.txt"));
 		
 		int n=scanner.nextInt();
 		System.out.println("Number of processes: "+n);
@@ -101,7 +101,7 @@ public class LeaderElection {
 				for(Runnable p:processes)
 				{
 					Process process=(Process)p;
-					if(!process.getIsTerminated()&&process.getCanExecuteRound())
+					if(!process.getIsTerminated() &&process.getCanExecuteRound())
 					{
 						flag=true;
 						break;
@@ -138,6 +138,7 @@ public class LeaderElection {
 				}
 			}
 		}
+		System.out.println("Total number of messages: ");
 			
 			
 		}

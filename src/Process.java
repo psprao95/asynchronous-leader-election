@@ -21,7 +21,7 @@ public class Process implements Runnable {
 	
 	private int pendingAck;
 	private boolean ackReturned;
-	
+	private boolean newInfo;
 	private boolean leader_found;
 	private volatile boolean isTerminated;
 	private volatile boolean canBeginRound;
@@ -37,15 +37,19 @@ public class Process implements Runnable {
 		this.isTerminated=false;
 		this.leader_found=false;
 		this.canBeginRound=false;
-		//this.neighbors=neighbors;
+		this.newInfo=true;
 		this.parent=null;
 		this.grandParent=-1;
-		this.children=new ArrayList<Integer>();
+		//this.children=new ArrayList<Integer>();
 		this.max_so_far=uid;
 	}
 	
 	public int getId()
 	{
+		if(this.equals(null))
+		{
+			return -1;
+		}
 		return uid;
 	}
 	
@@ -84,10 +88,11 @@ public class Process implements Runnable {
 	
 	public void transmitMessage(Process receiver,Message message)
 	{
-		int travelTime=(int)(Math.random()*10)+1;
-		int time=round+travelTime;
+		int travelTime=message.getTime();
+		int time=round+message.getTime();
 		message.setTime(time);
-		System.out.println("Message type: "+message.getMessageType()+" Content: "+message.getId()+" From: Process "+this.uid+" To: Process "+receiver.getId()+" Time STamp: "+message.getTime());
+		System.out.println("Round: "+this.round+" Message : "+message.getMessageType()+" Content: "+message.getId()+
+				" From: Process "+this.uid+" To: Process "+receiver.getId()+" Travel Time: "+travelTime+" will reach at: "+time);
 		receiver.putMessage(message);
 		
 	}
@@ -160,24 +165,23 @@ public class Process implements Runnable {
 				
 				
 				
-				if(round==1)
-				{
+				/*if(round==1)
+				
 					Message message=new Message(this.uid,this.uid,-1,MessageType.EXPLORE);
 					pendingAck=channels.size();
 					ackReturned=false;
 					flood(message);
 					
 				}
-				else {
+				else {*/
 				/* check for leader found message */
 					for(Message message:receivedMessages)
 					{
 						if(message.getMessageType().equals(MessageType.LEADER)&& this.status.equals(Status.UNKNOWN))
 						{
 							this.status=Status.NON_LEADER;
-							//this.parent=getChannel(message.getSender()).getProcess();
-							message.setSender(this.uid);
-							flood(message);
+							Message m=new Message(message.getId(),this.uid,-1,MessageType.LEADER);
+							flood(m);
 							leader_found=true;
 							System.out.println("Process "+this.uid+" Process "+message.getId()+" is the leader");
 							
@@ -186,7 +190,7 @@ public class Process implements Runnable {
 					
 					if(!leader_found)
 					{
-						boolean newInfo=false;
+						//boolean newInfo=false;
 						for(Message message:receivedMessages)
 						{
 							if(message.getMessageType().equals(MessageType.EXPLORE) && message.getId()>this.max_so_far)
@@ -203,7 +207,16 @@ public class Process implements Runnable {
 						
 						if(newInfo)
 						{
-							Message message=new Message(max_so_far,uid,this.parent.getId(), MessageType.EXPLORE);
+							int p;
+							if(parent==null)
+							{
+								p=-1;
+							}
+							else
+							{
+								p=parent.getId();
+							}
+							Message message=new Message(max_so_far,uid,p, MessageType.EXPLORE);
 							//this.ackReturned=false;
 							if(this.parent!=null)
 							{
@@ -248,7 +261,7 @@ public class Process implements Runnable {
 									ackReturned=true;
 									Message accept=new Message(this.max_so_far,this.uid,this.grandParent,MessageType.ACK);
 									transmitMessage(this.parent,accept);
-									System.out.println("Process "+this.uid+ " children: ");
+									//System.out.println("Process "+this.uid+ " children: ");
 									
 								}
 							}
@@ -265,19 +278,20 @@ public class Process implements Runnable {
 						}
 						
 					}
-				}
+				
 				
 				round++;
 				
 				if(leader_found)
 				{
 					this.isTerminated=true;
-					setCanExecuteRound(false);
+					//setCanExecuteRound(false);
 					System.out.println("Process "+this.uid+" is done");
 					break;
 				}
 				
 				setCanExecuteRound(false);
+				this.newInfo=false;
 						
 			}
 							
