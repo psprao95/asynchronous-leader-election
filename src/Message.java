@@ -1,28 +1,54 @@
-
+import java.util.ArrayList;
 public class Message {
-	private int maxSoFar;
+	
+	
+	private int id;
+	private int sender;
+	private int senderParent;
 	private int travelTime;
-	String type;
-	public Message(int uid, String type)
+	private MessageType messageType;
+	
+	
+	public Message(int id, int sender,int lastExploreSenderParent,MessageType messageType)
 	{
-		this.maxSoFar=uid;
-		this.type=type;
+		this.id=id;
+		this.sender=sender;
+		this.senderParent=lastExploreSenderParent;
+		this.messageType=messageType;
 		this.travelTime=(int)(Math.random()*10)+1;
 	}
 	
 	public int getId()
 	{
-		return this.maxSoFar;
+		return this.id;
 	}
 	
-	public int getTravelTime()
+	public int getSender()
+	{
+		return this.sender;
+	}
+	
+	int getSenderParent()
+	{
+		return this.senderParent;
+	}
+	
+	public MessageType getMessageType()
+	{
+		return this.messageType;
+	}
+	
+	public int getTime()
 	{
 		return this.travelTime;
 	}
 	
-	public void decrementTravelTime()
+	public void setTime(int time)
 	{
-		this.travelTime--;
+		this.travelTime=time;
 	}
+	}
+	
+	
 
-}
+

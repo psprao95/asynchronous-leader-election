@@ -1,6 +1,7 @@
 import java.util.Scanner;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.concurrent.*;
 
 public class LeaderElection {
 
@@ -23,10 +24,20 @@ public class LeaderElection {
 		System.out.println("\n");
 		
 		
-		ArrayList<ArrayList<Integer>> neighborsList=new ArrayList<ArrayList<Integer>>();
+		
+		
+		Runnable processes[]=new Process[n];
 		for(int i=0;i<n;i++)
 		{
-			ArrayList<Integer> arr=new ArrayList<Integer>();
+			processes[i]=new Process(uids.get(i));
+			
+		}
+		
+		
+		
+		for(int i=0;i<n;i++)
+		{
+			Process p=(Process)processes[i];
 			System.out.print("Neighbors of process "+i+": ");
 			for(int j=0;j<n;j++)
 			{
@@ -36,22 +47,98 @@ public class LeaderElection {
 				
 				{
 				System.out.print(uids.get(j)+" ");
-				arr.add(uids.get(j));
+				p.addChannel((Process)processes[uids.get(j)]);
 			}
 				}
 			System.out.print("\n");
-			neighborsList.add(arr);
+			
 				
 		}
 		
 		
-		/*for(int i=0;i<n;i++)
+		// STart n threads
+		Thread[] threads=new Thread[n];
+		for(int i=0;i<n;i++)
 		{
-			Process process=new Process(uids.get(i),neighborsList.get(i));
-			new Thread(process).start();
-		}*/
+			threads[i]=new Thread(processes[i]);
+			threads[i].start();
+		}
+		
+		while(true)
+		{
+			/* check if any thread is alive */
+			boolean flag=false;
+			for(Thread t:threads)
+			{
+				if(t.isAlive())
+				{
+					flag=true;
+					break;
+				}
+			}
+			
+			if(!flag)
+			{
+				System.out.println("Excution finished. Leader elected");
+				break;
+			}
+			
+			for(Runnable p:processes)
+			{
+				Process process=(Process)p;
+				process.setCanExecuteRound(true);
+			}
+			
+			
+			/* wait till all processes have read their received messages */
+			while(true)
+			{
+				flag=false;
+				for(Runnable p:processes)
+				{
+					Process process=(Process)p;
+					if(process.getCanExecuteRound() && process.getIsTerminated()==false)
+					{
+						flag=true;
+						break;
+					}
+				}
+				if(!flag)
+				{
+					break;
+				}
+			}
+			
+			for(Runnable p:processes)
+			{
+				Process process=(Process)p;
+				process.setCanExecuteRound(true);
+			}
+			
+			while(true)
+			{
+				flag=false;
+				for(Runnable r:processes)
+				{
+					Process p=(Process)r;
+					if(!p.getIsTerminated()==false && p.getCanExecuteRound()==true)
+					{
+						flag=true;
+						break;
+					}
+				}
+				
+				if(!flag)
+				{
+					break;
+				}
+			}
+		}
+			
+			
+		}
 		
 		
-		scanner.close();
-	}
+		
+	
 }

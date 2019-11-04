@@ -1,50 +1,43 @@
 import java.util.Queue;
+import java.util.ArrayList;
 import java.util.LinkedList;
-
+import java.util.concurrent.*;
 public class Channel {
 	
 	private Queue<Message> messages;
-	private int src;
+	private Process process;
 	private int dest;
 	
-	public Channel(int src,int dest)
+	public Channel(Process process)
 	{
-		this.src=src;
-		this.dest=dest;
-		messages=new LinkedList<Message>();
+		this.process=process;
+		
+		messages=new ConcurrentLinkedQueue<Message>();
 	}
 	
-	public synchronized void send(Message message)
+	public  void addMessage(Message message)
 	{
 		messages.add(message);
 	}
 	
-	public synchronized Message receive()
+	public Process getProcess()
 	{
-		Message m=messages.peek();
-		
-		if(m!=null &&m.getTravelTime()==0)
-		{
-			return messages.poll();
-		}
-		return null;
-		
+		return process;
 	}
 	
-	public synchronized boolean isEmpty()
-	{
-		return messages.isEmpty();
-	}
 	
-	public synchronized void decrementTime()
+	
+	public ArrayList<Message> getMessages(int round)
 	{
-		for(Message message:messages)
-		{
-			if(message.getTravelTime()>0)
+		ArrayList<Message> result=new ArrayList<Message>();
+		while(messages.size()>0 && messages.peek().getTime()<=round)
 			{
-				message.decrementTravelTime();
+				result.add(messages.poll());
 			}
-		}
+		
+		return result;
 	}
+	
+	
 
 }
