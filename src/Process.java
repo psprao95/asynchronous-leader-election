@@ -13,17 +13,18 @@ public class Process implements Runnable {
 	private int round;
 	private Process parent;
 	private int grandParent;
+	ArrayList<Integer> children;
 	ArrayList<Channel> channels;
 	ArrayList<Message> receivedMessages;
 	
 	
-	private boolean newInfo;
+	
 	private int pendingAck;
 	private boolean ackReturned;
 	
 	private boolean leader_found;
-	private boolean isTerminated;
-	private boolean canBeginRound;
+	private volatile boolean isTerminated;
+	private volatile boolean canBeginRound;
 	
 	
 	public Process(int uid)
@@ -39,6 +40,7 @@ public class Process implements Runnable {
 		//this.neighbors=neighbors;
 		this.parent=null;
 		this.grandParent=-1;
+		this.children=new ArrayList<Integer>();
 		this.max_so_far=uid;
 	}
 	
@@ -82,7 +84,7 @@ public class Process implements Runnable {
 	
 	public void transmitMessage(Process receiver,Message message)
 	{
-		int travelTime=(int)(Math.random()*5)+1;
+		int travelTime=(int)(Math.random()*10)+1;
 		int time=round+travelTime;
 		message.setTime(time);
 		System.out.println("Message type: "+message.getMessageType()+" Content: "+message.getId()+" From: Process "+this.uid+" To: Process "+receiver.getId()+" Time STamp: "+message.getTime());
@@ -94,7 +96,7 @@ public class Process implements Runnable {
 	{
 		int sender=message.getSender();
 		Channel channel=getChannel(sender);
-		if(getChannel(sender)!=null)
+		if(this.getChannel(sender)!=null)
 		{
 			channel.addMessage(message);
 		}
@@ -164,22 +166,21 @@ public class Process implements Runnable {
 					pendingAck=channels.size();
 					ackReturned=false;
 					flood(message);
-					round++;
-					setCanExecuteRound(false);
-					continue;
+					
 				}
-				
+				else {
 				/* check for leader found message */
 					for(Message message:receivedMessages)
 					{
-						if(message.getMessageType().equals(MessageType.LEADER))
+						if(message.getMessageType().equals(MessageType.LEADER)&& this.status.equals(Status.UNKNOWN))
 						{
 							this.status=Status.NON_LEADER;
-							this.parent=getChannel(message.getSender()).getProcess();
+							//this.parent=getChannel(message.getSender()).getProcess();
+							message.setSender(this.uid);
 							flood(message);
 							leader_found=true;
 							System.out.println("Process "+this.uid+" Process "+message.getId()+" is the leader");
-							break;
+							
 						}
 					}
 					
@@ -188,12 +189,12 @@ public class Process implements Runnable {
 						boolean newInfo=false;
 						for(Message message:receivedMessages)
 						{
-							if(message.getMessageType().equals(MessageType.EXPLORE) && message.getId()>max_so_far)
+							if(message.getMessageType().equals(MessageType.EXPLORE) && message.getId()>this.max_so_far)
 							{
 								newInfo=true;
 								this.max_so_far=message.getId();
 								
-								//this.ackReturned=false;
+								this.ackReturned=false;
 								this.parent=getChannel(message.getSender()).getProcess();
 								this.grandParent=message.getSenderParent();
 								
@@ -203,7 +204,7 @@ public class Process implements Runnable {
 						if(newInfo)
 						{
 							Message message=new Message(max_so_far,uid,this.parent.getId(), MessageType.EXPLORE);
-							this.ackReturned=false;
+							//this.ackReturned=false;
 							if(this.parent!=null)
 							{
 								this.pendingAck=channels.size()-1;
@@ -240,11 +241,15 @@ public class Process implements Runnable {
 								
 								
 								
+								
+								
 								if(!ackReturned && pendingAck==0 && this.status.equals(Status.UNKNOWN) && parent!=null)
 								{
 									ackReturned=true;
 									Message accept=new Message(this.max_so_far,this.uid,this.grandParent,MessageType.ACK);
 									transmitMessage(this.parent,accept);
+									System.out.println("Process "+this.uid+ " children: ");
+									
 								}
 							}
 
@@ -254,12 +259,12 @@ public class Process implements Runnable {
 						{
 							this.status=Status.LEADER;
 							this.leader_found=true;
-							Message leader_broadcast=new Message(this.max_so_far,this.uid,0,MessageType.LEADER);
-							System.out.println("Process "+this.uid+": Im am leader");
+							Message leader_broadcast=new Message(this.uid,this.uid,-1,MessageType.LEADER);
+							System.out.println("Process "+this.uid+": I am leader");
 							flood(leader_broadcast);
 						}
 						
-					
+					}
 				}
 				
 				round++;
@@ -267,7 +272,8 @@ public class Process implements Runnable {
 				if(leader_found)
 				{
 					this.isTerminated=true;
-					
+					setCanExecuteRound(false);
+					System.out.println("Process "+this.uid+" is done");
 					break;
 				}
 				

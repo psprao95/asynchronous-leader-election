@@ -43,6 +43,11 @@ public class Message {
 		return this.travelTime;
 	}
 	
+	public void setSender(int sender)
+	{
+		this.sender=sender;
+	}
+	
 	public void setTime(int time)
 	{
 		this.travelTime=time;

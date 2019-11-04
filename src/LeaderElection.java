@@ -10,6 +10,7 @@ public class LeaderElection {
 	public static void main(String[] args) throws Exception
 	{
 		Scanner scanner=new Scanner(new File("/users/psprao/downloads/connectivity.txt"));
+		//Scanner scanner=new Scanner(new File("/users/psprao/downloads/conectivity2.txt"));
 		
 		int n=scanner.nextInt();
 		System.out.println("Number of processes: "+n);
@@ -38,7 +39,7 @@ public class LeaderElection {
 		for(int i=0;i<n;i++)
 		{
 			Process p=(Process)processes[i];
-			System.out.print("Neighbors of process "+i+": ");
+			System.out.print("Neighbors of process "+uids.get(i)+": ");
 			for(int j=0;j<n;j++)
 			{
 				int k=scanner.nextInt();
@@ -47,7 +48,9 @@ public class LeaderElection {
 				
 				{
 				System.out.print(uids.get(j)+" ");
-				p.addChannel((Process)processes[uids.get(j)]);
+				p.addChannel((Process)processes[j]);
+				
+				
 			}
 				}
 			System.out.print("\n");
@@ -70,6 +73,7 @@ public class LeaderElection {
 			boolean flag=false;
 			for(Thread t:threads)
 			{
+				
 				if(t.isAlive())
 				{
 					flag=true;
@@ -97,7 +101,7 @@ public class LeaderElection {
 				for(Runnable p:processes)
 				{
 					Process process=(Process)p;
-					if(process.getCanExecuteRound() && process.getIsTerminated()==false)
+					if(!process.getIsTerminated()&&process.getCanExecuteRound())
 					{
 						flag=true;
 						break;
@@ -121,7 +125,7 @@ public class LeaderElection {
 				for(Runnable r:processes)
 				{
 					Process p=(Process)r;
-					if(!p.getIsTerminated()==false && p.getCanExecuteRound()==true)
+					if(!p.getIsTerminated()&&p.getCanExecuteRound())
 					{
 						flag=true;
 						break;
