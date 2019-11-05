@@ -1,12 +1,11 @@
 import java.util.Queue;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.concurrent.*;
 public class Channel {
 	
 	private Queue<Message> messages;
 	private Process process;
-	private int dest;
+	
 	
 	public Channel(Process process)
 	{
@@ -30,7 +29,7 @@ public class Channel {
 	public ArrayList<Message> getMessages(int round)
 	{
 		ArrayList<Message> result=new ArrayList<Message>();
-		while(messages.size()>0 && messages.peek().getTime()<=round)
+		while(messages.size()>0 && messages.peek().getDeliveryRound()<=round)
 			{
 				result.add(messages.poll());
 			}

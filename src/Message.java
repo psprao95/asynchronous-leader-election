@@ -1,11 +1,14 @@
-import java.util.ArrayList;
+
+
 public class Message {
 	
-	
+	private final static int MIN_TIME=1;
+	private final static int MAX_TIME=10;
 	private int id;
 	private int sender;
 	private int senderParent;
 	private int travelTime;
+	private int deliveryRound;
 	private MessageType messageType;
 	
 	
@@ -15,7 +18,7 @@ public class Message {
 		this.sender=sender;
 		this.senderParent=lastExploreSenderParent;
 		this.messageType=messageType;
-		this.travelTime=(int)(Math.random()*9)+1;
+		generateTravelTime();
 	}
 	
 	public int getId()
@@ -33,12 +36,17 @@ public class Message {
 		return this.senderParent;
 	}
 	
-	public MessageType getMessageType()
+	public MessageType getType()
 	{
 		return this.messageType;
 	}
 	
-	public int getTime()
+	public int getDeliveryRound()
+	{
+		return this.deliveryRound;
+	}
+	
+	public int getTravelTime()
 	{
 		return this.travelTime;
 	}
@@ -51,6 +59,17 @@ public class Message {
 	public void setTime(int time)
 	{
 		this.travelTime=time;
+	}
+	
+	public void generateTravelTime()
+	{
+		this.travelTime=(int)(Math.random()*(MAX_TIME-MIN_TIME))+MIN_TIME;
+		
+	}
+	
+	public void setDeliveryRound(int deliveryRound)
+	{
+		this.deliveryRound=deliveryRound;
 	}
 	}
 	
