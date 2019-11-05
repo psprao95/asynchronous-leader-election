@@ -63,7 +63,7 @@ public class LeaderElection {
 
             /* no thread alive, exit */
             if (!flag) {
-                System.out.println("Excution finished. Leader elected");
+                System.out.println("Execution finished. Leader elected");
                 break;
             }
 
@@ -77,7 +77,7 @@ public class LeaderElection {
                 flag = false;
                 for (Runnable p: processes) {
                     Process process = (Process) p;
-                    if (!process.getIsTerminated() && process.getCanExecuteRound()) {
+                    if (!process.getIsDone() && process.getGreenSignal()) {
                         flag = true;
                         break;
                     }
@@ -96,7 +96,7 @@ public class LeaderElection {
                 flag = false;
                 for (Runnable r: processes) {
                     Process p = (Process) r;
-                    if (!p.getIsTerminated() && p.getCanExecuteRound()) {
+                    if (!p.getIsDone() && p.getGreenSignal()) {
                         flag = true;
                         break;
                     }
@@ -108,7 +108,7 @@ public class LeaderElection {
                 }
             }
         }
-        System.out.println("Total number of messages: ");
+        System.out.println("Total number of messages: "+Process.getTotalMessages());
 
     }
 

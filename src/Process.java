@@ -12,12 +12,13 @@ public class Process implements Runnable {
     ArrayList < Channel > channels;
     ArrayList < Message > receivedMessages;
 
-    private int pendingAck;
+    private int requiredAcks;
     private boolean allAcksReturned;
     private boolean newInfo;
     private boolean leader_found;
     private volatile boolean isDone;
     private volatile boolean greenSignal;
+    private static int totalMessages=0;
 
 
     public Process(int uid) {
@@ -38,11 +39,11 @@ public class Process implements Runnable {
         return uid;
     }
 
-    public boolean getCanExecuteRound() {
+    public boolean getGreenSignal() {
         return this.greenSignal;
     }
 
-    public boolean getIsTerminated() {
+    public boolean getIsDone() {
         return this.isDone;
     }
 
@@ -62,6 +63,12 @@ public class Process implements Runnable {
             }
         }
     }
+    
+    public static int getTotalMessages()
+    
+    		{
+    	return totalMessages;
+    		}
 
     public void transmitMessage(Process receiver, Message message) {
         message.generateTravelTime();
@@ -72,6 +79,7 @@ public class Process implements Runnable {
         System.out.println("Round: " + this.round + " Message : " + message.getType() + " Content: " + message.getId() +
             " From: Process " + this.uid + " To: Process " + receiver.getId() + " Travel Time: " + travelTime + " will reach at: " + deliveryRound);
         receiver.putMessage(message);
+        totalMessages++;
 
     }
 
@@ -154,9 +162,9 @@ public class Process implements Runnable {
                         Message message = new Message(max_so_far, uid, p, MessageType.EXPLORE);
                         //this.ackReturned=false;
                         if (this.parent != null) {
-                            this.pendingAck = channels.size() - 1;
+                            this.requiredAcks = channels.size() - 1;
                         } else {
-                            this.pendingAck = channels.size();
+                            this.requiredAcks = channels.size();
                         }
                         flood(message);
                     }
@@ -172,12 +180,12 @@ public class Process implements Runnable {
 
                         if (m.getType().equals(MessageType.REJECT) || m.getType().equals(MessageType.COMPLETED)) {
                             if (this.parent != null && this.parent.getId() == m.getSenderParent()) {
-                                this.pendingAck--;
+                                this.requiredAcks--;
                             } else if (parent == null && m.getSenderParent() == -1) {
-                                this.pendingAck--;
+                                this.requiredAcks--;
                             }
 
-                            if (!allAcksReturned && pendingAck == 0 && this.status.equals(Status.UNKNOWN) && parent != null) {
+                            if (!allAcksReturned && requiredAcks == 0 && this.status.equals(Status.UNKNOWN) && parent != null) {
                                 allAcksReturned = true;
                                 Message accept = new Message(this.max_so_far, this.uid, this.grandParent, MessageType.COMPLETED);
                                 transmitMessage(this.parent, accept);
@@ -185,7 +193,7 @@ public class Process implements Runnable {
                         }
                     }
 
-                    if (pendingAck == 0 && this.parent == null && this.status.equals(Status.UNKNOWN)) {
+                    if (requiredAcks == 0 && this.parent == null && this.status.equals(Status.UNKNOWN)) {
                         this.status = Status.LEADER;
                         this.leader_found = true;
                         Message leader_broadcast = new Message(this.uid, this.uid, -1, MessageType.LEADER_BROADCAST);
