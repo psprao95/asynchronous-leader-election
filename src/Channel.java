@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.concurrent.*;
 public class Channel {
 	
-	private Queue<Message> messages;
+	private DelayQueue<Message> messages;
 	private Process process;
 	
 	
@@ -11,12 +11,12 @@ public class Channel {
 	{
 		this.process=process;
 		
-		messages=new ConcurrentLinkedQueue<Message>();
+		messages=new DelayQueue<Message>();
 	}
 	
 	public  void addMessage(Message message)
 	{
-		messages.add(message);
+		messages.offer(message);
 	}
 	
 	public Process getProcess()
@@ -29,10 +29,14 @@ public class Channel {
 	public ArrayList<Message> getMessages(int round)
 	{
 		ArrayList<Message> result=new ArrayList<Message>();
-		while(messages.size()>0 && messages.peek().getDeliveryRound()<=round)
-			{
-				result.add(messages.poll());
-			}
+		try
+		{if(!messages.isEmpty()) {
+			result.add(messages.take());}
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+		}
 		
 		return result;
 	}

@@ -71,13 +71,11 @@ public class Process implements Runnable {
     		}
 
     public void transmitMessage(Process receiver, Message message) {
-        message.generateTravelTime();
-        int travelTime = message.getTravelTime();
-        int deliveryRound = message.getTravelTime() + this.round;
-        message.setDeliveryRound(deliveryRound);
+        message.generateTime();
+        
 
         System.out.println("Round: " + this.round + " Message : " + message.getType() + " Content: " + message.getId() +
-            " From: Process " + this.uid + " To: Process " + receiver.getId() + " Travel Time: " + travelTime + " will reach at: " + deliveryRound);
+            " From: Process " + this.uid + " To: Process " + receiver.getId() );
         receiver.putMessage(message);
         totalMessages++;
 
@@ -99,26 +97,53 @@ public class Process implements Runnable {
         }
         return null;
     }
+    
+    public void initPhase()
+    {
+    	int p;
+        if (parent == null) {
+            p = -1;
+        } else {
+            p = parent.getId();
+        }
+        Message message = new Message(max_so_far, uid, p, MessageType.EXPLORE);
+        //this.ackReturned=false;
+        if (this.parent != null) {
+            this.requiredAcks = channels.size() - 1;
+        } else {
+            this.requiredAcks = channels.size();
+        }
+        flood(message);
+    }
+    
+    public void goTonextRound()
+    {
+    	//this.round++;
+        //setGreenSignal(false);
+        this.newInfo = false;
+    }
 
     @Override
     public void run() {
         try {
             while (true) {
+            	
+            	
 
-                while (greenSignal == false) {
+                /*while (greenSignal == false) {
                     try {
                         Thread.sleep(10);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
                 receivedMessages = new ArrayList < Message > ();
                 for (Channel channel: channels) {
                     receivedMessages.addAll(channel.getMessages(round));
                 }
 
-                setGreenSignal(false);
+                /*setGreenSignal(false);
 
                 // Wait till all processes read their received messages
                 while (greenSignal == false) {
@@ -127,7 +152,7 @@ public class Process implements Runnable {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
+                }*/
 
                 for (Message message: receivedMessages) {
                     if (message.getType().equals(MessageType.LEADER_BROADCAST) && this.status.equals(Status.UNKNOWN)) {
@@ -208,10 +233,9 @@ public class Process implements Runnable {
                     System.out.println("Process " + this.uid + ": I am terminating ...");
                     break;
                 }
+                goTonextRound();
 
-                this.round++;
-                setGreenSignal(false);
-                this.newInfo = false;
+                
             }
         } catch (Exception e) {
             e.printStackTrace();

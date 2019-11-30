@@ -8,8 +8,9 @@ public class LeaderElection {
 
 
     public static void main(String[] args) throws Exception {
-        Scanner scanner=new Scanner(new File("connectivity.txt"));
-        //Scanner scanner = new Scanner(new File("connectivity2.txt"));
+        //Scanner scanner=new Scanner(new File("connectivity2.txt"));
+       
+      Scanner scanner = new Scanner(new File("sample-input.dat"));
 
         int n = scanner.nextInt();
         System.out.println("Number of processes: " + n);
@@ -41,7 +42,7 @@ public class LeaderElection {
             }
             System.out.print("\n");
         }
-        
+           
         scanner.close();
 
         // STart n threads
@@ -67,12 +68,14 @@ public class LeaderElection {
                 break;
             }
 
-            for (Runnable p: processes) {
+            /*
+             for (Runnable p: processes) {
+             
                 Process process = (Process) p;
                 process.setGreenSignal(true);
             }
 
-            /* wait till all processes have read their received messages */
+           
             while (true) {
                 flag = false;
                 for (Runnable p: processes) {
@@ -102,11 +105,12 @@ public class LeaderElection {
                     }
                 }
 
-                /* no process is executing current round */
+               
                 if (!flag) {
                     break;
                 }
             }
+        */
         }
         System.out.println("Total number of messages: "+Process.getTotalMessages());
 

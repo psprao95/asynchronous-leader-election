@@ -1,24 +1,29 @@
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.*;
 
-
-public class Message {
+public class Message implements Delayed{
 	
 	private final static int MIN_TIME=1;
+	private final int FACTOR=10_000;
 	private final static int MAX_TIME=10;
 	private int id;
 	private int sender;
 	private int senderParent;
-	private int travelTime;
-	private int deliveryRound;
+	private LocalDateTime deliveryTime;
+	private LocalDateTime deliveryRound;
 	private MessageType messageType;
+	private Process receiver;
 	
 	
 	public Message(int id, int sender,int lastExploreSenderParent,MessageType messageType)
 	{
+		super();
 		this.id=id;
 		this.sender=sender;
 		this.senderParent=lastExploreSenderParent;
 		this.messageType=messageType;
-		generateTravelTime();
+		
 	}
 	
 	public int getId()
@@ -41,36 +46,43 @@ public class Message {
 		return this.messageType;
 	}
 	
-	public int getDeliveryRound()
-	{
-		return this.deliveryRound;
-	}
 	
-	public int getTravelTime()
-	{
-		return this.travelTime;
-	}
+	
+	
 	
 	public void setSender(int sender)
 	{
 		this.sender=sender;
 	}
 	
-	public void setTime(int time)
-	{
-		this.travelTime=time;
-	}
 	
-	public void generateTravelTime()
+	
+	public void generateTime()
 	{
-		this.travelTime=(int)(Math.random()*(MAX_TIME-MIN_TIME))+MIN_TIME;
+		int r=(int)(Math.random()*(MAX_TIME-MIN_TIME))+MIN_TIME;
+		this.deliveryTime=LocalDateTime.now().plusNanos(r*FACTOR);
 		
 	}
 	
-	public void setDeliveryRound(int deliveryRound)
+	public LocalDateTime getDeliveryTime()
 	{
-		this.deliveryRound=deliveryRound;
+		return this.deliveryTime;
 	}
+	
+	@Override
+	public long getDelay(TimeUnit unit)
+	{
+		Long diff=LocalDateTime.now().until(deliveryTime,ChronoUnit.MILLIS);
+		return unit.convert(diff,TimeUnit.MILLISECONDS);
+	}
+	
+	@Override
+	  public int compareTo(Delayed that) {
+	    
+	    return 0;
+	  }
+	
+	
 	}
 	
 	
